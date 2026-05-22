@@ -1,10 +1,10 @@
 @keyframes subtleReveal {
-            from { opacity: 0; transform: translateY(3px); }
+            from { opacity: 0; transform: translateY(2px); }
             to { opacity: 1; transform: translateY(0); }
         }
         .animate-reveal {
-            animation: subtleReveal 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            animation: subtleReveal 0.3s ease-out forwards;
         }
         body {
-            background-color: #FDFBF7; /* Soft Premium Warm Ivory */
+            background-color: #FFFFFF;
         }
