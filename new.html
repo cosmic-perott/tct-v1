@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IceBerg Engine</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+        @keyframes subtleReveal {
+            from { opacity: 0; transform: translateY(2px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .animate-reveal {
+            animation: subtleReveal 0.3s ease-out forwards;
+        }
+        body {
+            background-color: #FFFFFF;
+        }
+    </style>
+</head>
+<body class="text-neutral-900 antialiased selection:bg-neutral-900 selection:text-white">
+
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+
+        function MinimalCurator() {
+            const [topic, setTopic] = useState('');
+            const [currentStep, setCurrentStep] = useState('idle'); // idle, processing, complete
+            const [statusText, setStatusText] = useState('');
+            const [sourcesCount, setSourcesCount] = useState(0);
+
+            const executionPhases = [
+                "Scanning global search indexes...",
+                "Isolating multi-source contradictions...",
+                "Removing editorial bias & sponsorship parameters...",
+                "Extracting universal core consensus..."
+            ];
+
+            useEffect(() => {
+                if (currentStep !== 'processing') return;
+
+                let phaseIndex = 0;
+                setStatusText(executionPhases[0]);
+
+                const interval = setInterval(() => {
+                    phaseIndex++;
+                    if (phaseIndex < executionPhases.length) {
+                        setStatusText(executionPhases[phaseIndex]);
+                    } else {
+                        clearInterval(interval);
+                        setSourcesCount(Math.floor(Math.random() * 20) + 25);
+                        setCurrentStep('complete');
+                    }
+                }, 1000);
+
+                return () => clearInterval(interval);
+            }, [currentStep]);
+
+            const handleSubmit = (e) => {
+                e.preventDefault();
+                if (!topic.trim()) return;
+                setCurrentStep('processing');
+            };
+
+            return (
+                <div className="min-h-screen flex flex-col justify-between px-6 py-8 bg-white">
+                    
+                    {/* 1. Header Area (Logo & Switcher Only) */}
+                    <header className="max-w-6xl w-full mx-auto flex justify-between items-center">
+                        <div className="flex items-center gap-2 select-none">
+                            <span className="font-medium tracking-tight text-neutral-900 text-base">IceBerg.</span>
+                        </div>
+                        <div className="text-[11px] font-medium tracking-wide text-neutral-400 uppercase">
+                            General Track
+                        </div>
+                    </header>
+
+                    {/* 2. Central App Canvas */}
+                    <main className="flex-1 flex flex-col items-center justify-center max-w-xl w-full mx-auto -mt-12">
+                        
+                        {/* STATE A: IDLE SEARCH (The Clean Slate) */}
+                        {currentStep === 'idle' && (
+                            <div className="w-full text-center animate-reveal">
+                                <form onSubmit={handleSubmit} className="w-full">
+                                    <div className="relative group">
+                                        <input
+                                            type="text"
+                                            value={topic}
+                                            onChange={(e) => setTopic(e.target.value)}
+                                            placeholder="What do you want to learn?"
+                                            className="w-full bg-white text-neutral-900 text-lg border-b border-neutral-200 py-4 px-1 placeholder-neutral-300 focus:outline-none focus:border-neutral-900 transition-colors duration-300"
+                                            autoFocus
+                                        />
+                                        <button 
+                                            type="submit"
+                                            disabled={!topic.trim()}
+                                            className="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-900 transition-colors disabled:opacity-0 p-1"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </form>
+                                <p className="text-neutral-300 text-[11px] font-medium tracking-wide uppercase mt-4 select-none">
+                                    Consensus Filtration Engine
+                                </p>
+                            </div>
+                        )}
+
+                        {/* STATE B: ULTRA-MINIMAL PROCESSING */}
+                        {currentStep === 'processing' && (
+                            <div className="w-full text-center py-12 animate-reveal">
+                                <div className="inline-block relative w-12 h-12 mb-6">
+                                    <div className="absolute inset-0 border-2 border-neutral-100 rounded-full" />
+                                    <div className="absolute inset-0 border-2 border-t-neutral-900 rounded-full animate-spin" />
+                                </div>
+                                <p className="text-neutral-500 font-mono text-xs tracking-wider uppercase">
+                                    {statusText}
+                                </p>
+                            </div>
+                        )}
+
+                        {/* STATE C: THE SYNTHESIS GATEWAY */}
+                        {currentStep === 'complete' && (
+                            <div className="w-full border border-neutral-100 rounded-2xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.02)] animate-reveal bg-white">
+                                <div className="border-b border-neutral-100 pb-6 mb-6">
+                                    <div className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-1.5 font-mono">Analysis Complete</div>
+                                    <h2 className="text-xl font-semibold text-neutral-900 tracking-tight">"{topic}" Consolidated</h2>
+                                    <p className="text-sm text-neutral-500 mt-2 leading-relaxed">
+                                        Our analysis isolated <span className="text-neutral-900 font-medium">{sourcesCount} conflicting perspectives</span> across mainstream articles, tutorials, and discussions. We have filtered the noise down to a single definitive 5-step curriculum execution map.
+                                    </p>
+                                </div>
+
+                                <div className="flex items-center justify-between gap-4">
+                                    <div>
+                                        <span className="text-[10px] text-neutral-400 font-mono uppercase tracking-wider block">One-time Access</span>
+                                        <span className="text-2xl font-bold text-neutral-900">$4.99</span>
+                                    </div>
+                                    <button 
+                                        onClick={() => alert("Launching Stripe billing layout...")}
+                                        className="bg-neutral-900 text-white font-medium text-sm px-6 py-3 rounded-xl hover:bg-neutral-800 transition-colors shadow-sm"
+                                    >
+                                        Unlock Curriculum
+                                    </button>
+                                </div>
+
+                                <div className="mt-6 pt-5 border-t border-neutral-100 flex justify-start">
+                                    <button 
+                                        onClick={() => { setTopic(''); setCurrentStep('idle'); }}
+                                        className="text-neutral-400 hover:text-neutral-900 text-xs transition-colors"
+                                    >
+                                        ← Start over
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                    </main>
+
+                    {/* 3. Footer */}
+                    <footer className="max-w-6xl w-full mx-auto text-center text-[11px] text-neutral-300 font-medium tracking-wide uppercase select-none">
+                        Securely Powered by Stripe &bull; Verified by Google Vertex AI
+                    </footer>
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<MinimalCurator />);
+    </script>
+</body>
+</html>
