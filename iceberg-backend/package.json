@@ -1,0 +1,14 @@
+{
+  "name": "iceberg-backend",
+  "version": "1.0.0",
+  "type": "module",
+  "main": "server.js",
+  "dependencies": {
+    "@google/genai": "^0.1.2",
+    "@tavily/core": "^0.0.2",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "sqlite": "^5.1.1",
+    "sqlite3": "^5.1.7"
+  }
+}
