@@ -1,141 +1,132 @@
-const { useState, useEffect } = React;
+import express from 'express';
+import cors from 'cors';
+import { GoogleGenAI } from '@google/genai';
+import sqlite3 from 'sqlite3';
+import { open } from 'sqlite';
+import { tavily } from '@tavily/core';
+import 'dotenv/config';
 
-        function MinimalCurator() {
-            const [topic, setTopic] = useState('');
-            const [currentStep, setCurrentStep] = useState('idle'); // idle, processing, complete
-            const [statusText, setStatusText] = useState('');
-            const [sourcesCount, setSourcesCount] = useState(0);
+const app = express();
+app.use(cors());
+app.use(express.json());
+app.use(express.static('public')); // Serves your index.html from public/
 
-            const executionPhases = [
-                "Scanning global search indexes...",
-                "Isolating multi-source contradictions...",
-                "Removing editorial bias & sponsorship parameters...",
-                "Extracting universal core consensus..."
-            ];
+const PORT = process.env.PORT || 5000;
 
-            useEffect(() => {
-                if (currentStep !== 'processing') return;
+// Initialize APIs securely using process.env
+const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
+const tvly = tavily({ apiKey: process.env.TAVILY_API_KEY });
 
-                let phaseIndex = 0;
-                setStatusText(executionPhases[0]);
+let db;
 
-                const interval = setInterval(() => {
-                    phaseIndex++;
-                    if (phaseIndex < executionPhases.length) {
-                        setStatusText(executionPhases[phaseIndex]);
-                    } else {
-                        clearInterval(interval);
-                        setSourcesCount(Math.floor(Math.random() * 20) + 25);
-                        setCurrentStep('complete');
-                    }
-                }, 1000);
+async function initDatabase() {
+    db = await open({
+        filename: './iceberg_cache.db',
+        driver: sqlite3.Database
+    });
 
-                return () => clearInterval(interval);
-            }, [currentStep]);
+    await db.exec(`
+        CREATE TABLE IF NOT EXISTS curriculum_cache (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            topic_key TEXT UNIQUE,
+            curriculum_json TEXT,
+            search_count INTEGER DEFAULT 1,
+            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+        )
+    `);
+    console.log("🧊 IceBerg Core Database Initialized Successfully.");
+}
 
-            const handleSubmit = (e) => {
-                e.preventDefault();
-                if (!topic.trim()) return;
-                setCurrentStep('processing');
-            };
-
-            return (
-                <div className="min-h-screen flex flex-col justify-between px-6 py-8 bg-white">
-                    
-                    <header className="max-w-6xl w-full mx-auto flex justify-between items-center">
-                        <div className="flex items-center gap-2 select-none">
-                            <span className="font-semibold tracking-tight text-neutral-800 text-base">IceBerg.</span>
-                        </div>
-                        <div className="text-[11px] font-semibold tracking-wide text-neutral-400 uppercase">
-                            General Track
-                        </div>
-                    </header>
-
-                    <main className="flex-1 flex flex-col items-center justify-center max-w-xl w-full mx-auto -mt-12">
-                        
-                        {currentStep === 'idle' && (
-                            <div className="w-full text-center animate-reveal">
-                                <form onSubmit={handleSubmit} className="w-full">
-                                    <div className="relative group">
-                                        <input
-                                            type="text"
-                                            value={topic}
-                                            onChange={(e) => setTopic(e.target.value)}
-                                            placeholder="What do you want to learn?"
-                                            className="w-full bg-white text-neutral-800 text-lg border-b border-neutral-300 py-4 px-1 placeholder-neutral-300 focus:outline-none focus:border-neutral-800 transition-colors duration-300 font-medium"
-                                            autoFocus
-                                        />
-                                        <button 
-                                            type="submit"
-                                            disabled={!topic.trim()}
-                                            className="absolute right-2 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-800 transition-colors disabled:opacity-0 p-1"
-                                        >
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.2} stroke="currentColor" className="w-5 h-5">
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" />
-                                            </svg>
-                                        </button>
-                                    </div>
-                                </form>
-                                <p className="text-neutral-400 text-[11px] font-semibold tracking-wide uppercase mt-4 select-none">
-                                    IceBerg Research Engine
-                                </p>
-                            </div>
-                        )}
-
-                        {currentStep === 'processing' && (
-                            <div className="w-full text-center py-12 animate-reveal">
-                                <div className="inline-block relative w-12 h-12 mb-6">
-                                    <div className="absolute inset-0 border-2 border-neutral-100 rounded-full" />
-                                    <div className="absolute inset-0 border-2 border-t-neutral-800 rounded-full animate-spin" />
-                                </div>
-                                <p className="text-neutral-700 font-mono text-xs tracking-wider uppercase font-semibold">
-                                    {statusText}
-                                </p>
-                            </div>
-                        )}
-
-                        {currentStep === 'complete' && (
-                            <div className="w-full border border-neutral-200 rounded-2xl p-8 shadow-[0_8px_30px_rgb(0,0,0,0.015)] animate-reveal bg-white">
-                                <div className="border-b border-neutral-100 pb-6 mb-6">
-                                    <div className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest mb-1.5 font-mono">Analysis Complete</div>
-                                    <h2 className="text-xl font-bold text-neutral-800 tracking-tight">"{topic}" Consolidated</h2>
-                                    <p className="text-sm text-neutral-600 mt-2 leading-relaxed">
-                                        Our analysis isolated <span className="text-neutral-800 font-semibold">{sourcesCount} conflicting perspectives</span> across mainstream articles, tutorials, and discussions. We have filtered the noise down to a single definitive 5-step curriculum execution map.
-                                    </p>
-                                </div>
-
-                                <div className="flex items-center justify-between gap-4">
-                                    <div>
-                                        <span className="text-[10px] text-neutral-400 font-mono uppercase tracking-wider block">One-time Access</span>
-                                        <span className="text-2xl font-bold text-neutral-800">$4.99</span>
-                                    </div>
-                                    <button 
-                                        onClick={() => alert("Launching Stripe billing layout...")}
-                                        className="bg-neutral-800 text-white font-medium text-sm px-6 py-3 rounded-xl hover:bg-neutral-700 transition-colors shadow-sm"
-                                    >
-                                        Unlock Curriculum
-                                    </button>
-                                </div>
-
-                                <div className="mt-6 pt-5 border-t border-neutral-100 flex justify-start">
-                                    <button 
-                                        onClick={() => { setTopic(''); setCurrentStep('idle'); }}
-                                        className="text-neutral-400 hover:text-neutral-800 text-xs transition-colors font-medium"
-                                    >
-                                        ← Start over
-                                    </button>
-                                </div>
-                            </div>
-                        )}
-
-                    </main>
-
-                    <footer className="max-w-6xl w-full mx-auto text-center text-[11px] text-neutral-400 font-semibold tracking-wide uppercase select-none">
-                        Built By Project IceBerg
-                    </footer>
-                </div>
-            );
+// ---- THE CURRICULUM PIPELINE ROUTE ----
+app.get('/api/curriculum', async (req, res) => {
+    try {
+        const topic = req.query.topic;
+        if (!topic) {
+            return res.status(400).json({ error: "Missing topic query parameter." });
         }
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<MinimalCurator />);
+        const topicKey = topic.trim().toLowerCase();
+
+        // 1. Check local cache database
+        const cachedRow = await db.get(
+            'SELECT curriculum_json FROM curriculum_cache WHERE topic_key = ?', 
+            [topicKey]
+        );
+
+        if (cachedRow) {
+            console.log(`⚡ [Cache Hit] Serving stored data for: ${topicKey}`);
+            return res.json(JSON.parse(cachedRow.curriculum_json));
+        }
+
+        console.log(`🌐 [Cache Miss] Scouring the live web for: ${topicKey}...`);
+
+        // 2. Fetch from the live web via Tavily
+        const searchResponse = await tvly.search(topicKey, {
+            searchDepth: "basic",
+            maxResults: 5
+        });
+
+        const webContext = searchResponse.results
+            .map(res => `Title: ${res.title}\nContent: ${res.content}`)
+            .join("\n\n");
+
+        console.log("🤖 Consulting Gemini 2.5 Flash to de-haze the noise...");
+
+        // 3. Synthesize clean layout using Gemini
+        const prompt = `You are an elite educational architect. Analyze this raw, messy web data and completely strip away all marketing fluff, visual/text noise, ads, and repetitive filler. Reconstruct the clean, underlying core consensus into a pristine JSON structure.
+
+        Raw Web Data Context:
+        ${webContext}
+
+        Output requirements:
+        Return ONLY valid JSON matching this exact scheme. No conversational text, no markdown wrappers, no code blocks. Just the raw JSON object.
+        {
+          "topic": "${topicKey}",
+          "summary": "A concise summary of what this topic is.",
+          "milestones": [
+            {
+              "phase": 1,
+              "title": "Milestone Title",
+              "core_concept": "The main concept to learn.",
+              "action_item": "An actionable project requirement to prove mastery."
+            }
+          ]
+        }`;
+
+        const aiResponse = await ai.models.generateContent({
+            model: 'gemini-3-flash-preview',
+            contents: prompt,
+        });
+
+        let rawText = aiResponse.text.trim();
+        
+        // Clean out accidental markdown wrappers if any
+        if (rawText.startsWith("```json")) rawText = rawText.substring(7);
+        if (rawText.endsWith("```")) rawText = rawText.substring(0, rawText.length - 3);
+        rawText = rawText.trim();
+
+        const parsedJson = JSON.parse(rawText);
+
+        // 4. Save to local database
+        await db.run(
+            'INSERT OR IGNORE INTO curriculum_cache (topic_key, curriculum_json) VALUES (?, ?)',
+            [topicKey, rawText]
+        );
+
+        res.json(parsedJson);
+
+    } catch (error) {
+        console.error("Engine Generation Error:", error);
+        res.status(500).json({ error: "The engine failed to process this request." });
+    }
+});
+
+app.get('/api/health', (req, res) => {
+    res.json({ status: "IceBerg Server is alive and operational." });
+});
+
+initDatabase().then(() => {
+    app.listen(PORT, () => {
+        console.log(`🚀 IceBerg Engine roaring on http://localhost:${PORT}`);
+    });
+});
