@@ -57,12 +57,18 @@ const App: React.FC = () => {
             : msg
         )
       );
-    } catch (error) {
+    } catch (error: any) {
       console.error("Chat error:", error);
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      
       setMessages(prev => 
         prev.map(msg => 
           msg.id === aiMsgId 
-            ? { ...msg, text: "Sorry, I encountered an error while researching. Please try again.", isStreaming: false } 
+            ? { 
+                ...msg, 
+                text: `**Connection Error:**\n\`${errorMessage}\`\n\n*Note: The app is trying to connect directly to your Agent ID. If you see a "Failed to fetch" or "401/403" error, it means the browser is blocking the request due to CORS or missing authentication tokens for that specific Google Cloud endpoint.*`, 
+                isStreaming: false 
+              } 
             : msg
         )
       );
