@@ -1,39 +1,32 @@
-// Using the exact AGENT_ID provided
-const AGENT_ID = 'projects/project-b86e0955-d007-4347-bf5/locations/global/agents/agent_1779541809524';
-
 let currentSessionId: string | null = null;
 // Generate a unique user ID for this browser session
 const userId = "user-" + Math.random().toString(36).substring(7);
 
-const getBaseUrl = () => {
-  const parts = AGENT_ID.split('/');
-  // Extract location (e.g., 'global') from the ID
-  const locationId = parts.length > 3 ? parts[3] : 'us-central1';
-  
-  // Construct the endpoint as per ADK instructions
-  return `https://${locationId}-aiplatform.googleapis.com/v1/${AGENT_ID}`;
-};
+// The local backend proxy endpoint
+const PROXY_URL = '/api/agent';
 
 export const initChat = async () => {
-  const baseUrl = getBaseUrl();
-  
-  // Step 1: Create a Session
-  const response = await fetch(`${baseUrl}:query`, {
+  // Step 1: Create a Session via the backend proxy
+  const response = await fetch(PROXY_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      classMethod: 'async_create_session',
-      input: { user_id: userId }
+      action: 'create_session',
+      userId: userId
     })
   });
 
   if (!response.ok) {
-    const errorText = await response.text().catch(() => 'Unknown error');
-    throw new Error(`Failed to create ADK session (${response.status}): ${errorText}`);
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(`Failed to create session via proxy (${response.status}): ${errorData.error || response.statusText}`);
   }
 
   const data = await response.json();
-  currentSessionId = data.output.id;
+  if (data.output && data.output.id) {
+    currentSessionId = data.output.id;
+  } else {
+    throw new Error("Invalid session response format from proxy.");
+  }
 };
 
 export const sendMessageStream = async function* (message: string) {
@@ -41,25 +34,21 @@ export const sendMessageStream = async function* (message: string) {
     await initChat();
   }
 
-  const baseUrl = getBaseUrl();
-  
-  // Step 2: Stream Query using the session ID
-  const response = await fetch(`${baseUrl}:streamQuery`, {
+  // Step 2: Stream Query via the backend proxy
+  const response = await fetch(PROXY_URL, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      classMethod: 'async_stream_query',
-      input: {
-        user_id: userId,
-        session_id: currentSessionId,
-        message: message
-      }
+      action: 'stream_query',
+      userId: userId,
+      sessionId: currentSessionId,
+      message: message
     })
   });
 
   if (!response.ok) {
-    const errorText = await response.text().catch(() => 'Unknown error');
-    throw new Error(`Failed to stream query from ADK (${response.status}): ${errorText}`);
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(`Failed to stream query via proxy (${response.status}): ${errorData.error || response.statusText}`);
   }
 
   if (!response.body) {
