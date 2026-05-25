@@ -124,7 +124,7 @@ const App: React.FC = () => {
                 Travel advice without the BS.
               </h2>
               <p className="text-lg text-gray-500 max-w-2xl mb-12">
-                Unfiltered recommendations sourced from real people. We separate the genuine cultural landmarks from the overpriced tourist traps.
+                Ignore the hype. Remove the internet noise. We show you which places can actually elevate your trip experience and which places are just social clout.
               </p>
               
               {/* Suggestions */}
