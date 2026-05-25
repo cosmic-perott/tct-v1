@@ -1,20 +1,16 @@
-// The Agent ID must be provided via environment variables in the format:
-// projects/{project_id}/locations/{location_id}/reasoningEngines/{agent_id}
-const AGENT_ID = process.env.AGENT_ID || '';
+// Using the exact AGENT_ID provided
+const AGENT_ID = 'projects/project-b86e0955-d007-4347-bf5/locations/global/agents/agent_1779541809524';
 
 let currentSessionId: string | null = null;
 // Generate a unique user ID for this browser session
 const userId = "user-" + Math.random().toString(36).substring(7);
 
 const getBaseUrl = () => {
-  if (!AGENT_ID) {
-    throw new Error("AGENT_ID environment variable is missing. Please set it to your deployed Agent ID (e.g., projects/123/locations/us-central1/reasoningEngines/456).");
-  }
   const parts = AGENT_ID.split('/');
-  if (parts.length < 6) {
-     throw new Error("Invalid AGENT_ID format. Expected: projects/{project_id}/locations/{location_id}/reasoningEngines/{agent_id}");
-  }
-  const locationId = parts[3];
+  // Extract location (e.g., 'global') from the ID
+  const locationId = parts.length > 3 ? parts[3] : 'us-central1';
+  
+  // Construct the endpoint as per ADK instructions
   return `https://${locationId}-aiplatform.googleapis.com/v1/${AGENT_ID}`;
 };
 
