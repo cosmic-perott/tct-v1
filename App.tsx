@@ -66,7 +66,7 @@ const App: React.FC = () => {
           msg.id === aiMsgId 
             ? { 
                 ...msg, 
-                text: `**Connection Error:**\n\`${errorMessage}\`\n\n*Note: The app is trying to connect directly to your Agent ID. If you see a "Failed to fetch" or "401/403" error, it means the browser is blocking the request due to CORS or missing authentication tokens for that specific Google Cloud endpoint.*`, 
+                text: `**Backend Connection Error:**\n\`${errorMessage}\`\n\n*Note: The frontend is trying to reach the local \`/api/agent\` proxy. Ensure your Next.js/Express backend is running, and that \`GOOGLE_APPLICATION_CREDENTIALS\` is properly configured in your server environment.*`, 
                 isStreaming: false 
               } 
             : msg
