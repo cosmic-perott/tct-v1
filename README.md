@@ -4,4 +4,4 @@
 ***all code, architecture, ideas were made by cosmic-perott for the Google Cloud Rapid Agent Hackathon 2026***
 
 
-<img width="740" height="74" alt="Screenshot 2026-05-25 at 8 18 24 PM" src="https://github.com/user-attachments/assets/c3888cbd-1841-4d65-a0f0-5daec6d75759" />
+<img width="550" height="55" alt="Screenshot 2026-05-25 at 8 18 24 PM" src="https://github.com/user-attachments/assets/c3888cbd-1841-4d65-a0f0-5daec6d75759" />
