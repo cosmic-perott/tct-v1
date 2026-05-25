@@ -1,105 +1,45 @@
-let currentSessionId: string | null = null;
-// Generate a unique user ID for this browser session
-const userId = "user-" + Math.random().toString(36).substring(7);
+import { GoogleGenAI, Chat } from '@google/genai';
 
-// The local backend proxy endpoint
-const PROXY_URL = '/api/agent';
+// 1 & 2. Import and initialize GoogleGenAI with Vertex AI enabled
+// Safely access process.env in case it's not defined in the browser environment
+const apiKey = globalThis.process?.env?.API_KEY || '';
+const ai = new GoogleGenAI({ apiKey: apiKey, vertexai: true });
 
-export const initChat = async () => {
-  // Step 1: Create a Session via the backend proxy
-  const response = await fetch(PROXY_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      action: 'create_session',
-      userId: userId
-    })
+// 3. The exact project and agent path string updated to us-central1
+const AGENT_PATH = "projects/project-b86e0955-d007-4347-bf5/locations/us-central1/agents/agent_1779541809524";
+
+let chatSession: Chat | null = null;
+
+export const initChat = () => {
+  // Initialize the chat session using the agent path as the model
+  chatSession = ai.chats.create({
+    model: AGENT_PATH,
   });
-
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(`Failed to create session via proxy (${response.status}): ${errorData.error || response.statusText}`);
-  }
-
-  const data = await response.json();
-  if (data.output && data.output.id) {
-    currentSessionId = data.output.id;
-  } else {
-    throw new Error("Invalid session response format from proxy.");
-  }
 };
 
 export const sendMessageStream = async function* (message: string) {
-  if (!currentSessionId) {
-    await initChat();
+  if (!chatSession) {
+    initChat();
   }
-
-  // Step 2: Stream Query via the backend proxy
-  const response = await fetch(PROXY_URL, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      action: 'stream_query',
-      userId: userId,
-      sessionId: currentSessionId,
-      message: message
-    })
-  });
-
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    throw new Error(`Failed to stream query via proxy (${response.status}): ${errorData.error || response.statusText}`);
-  }
-
-  if (!response.body) {
-    throw new Error("Response body is null");
-  }
-
-  const decoder = new TextDecoder();
-  let buffer = '';
   
-  // @ts-ignore - async iteration over ReadableStream is supported in modern browsers
-  for await (const chunk of response.body) {
-    buffer += decoder.decode(chunk, { stream: true });
-    
-    // Split by newline to handle NDJSON, keeping the last incomplete line in the buffer
-    const lines = buffer.split('\n');
-    buffer = lines.pop() || ''; 
-    
-    for (const line of lines) {
-      if (!line.trim()) continue;
-      try {
-        const data = JSON.parse(line);
-        
-        // Extract the text part from the ADK response structure
-        if (data.content && data.content.parts && data.content.parts.length > 0) {
-          const text = data.content.parts[0].text;
-          if (text) {
-            yield text;
-          }
-        }
-      } catch (e) {
-        console.warn("Failed to parse ADK chunk line:", line);
-      }
-    }
+  if (!chatSession) {
+    throw new Error("Failed to initialize chat session.");
   }
 
-  // Process any remaining data in the buffer
-  if (buffer.trim()) {
-    try {
-      const data = JSON.parse(buffer);
-      if (data.content && data.content.parts && data.content.parts.length > 0) {
-        const text = data.content.parts[0].text;
-        if (text) {
-          yield text;
-        }
+  try {
+    // 4. Stream the text chunks directly back
+    const responseStream = await chatSession.sendMessageStream({ message });
+    for await (const chunk of responseStream) {
+      if (chunk.text) {
+        yield chunk.text;
       }
-    } catch (e) {
-      console.warn("Failed to parse final ADK chunk:", buffer);
     }
+  } catch (error) {
+    console.error("Error communicating with Agent:", error);
+    throw error;
   }
 };
 
 export const resetChat = () => {
-  currentSessionId = null;
+  chatSession = null;
 };
