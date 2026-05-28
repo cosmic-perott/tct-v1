@@ -1,3 +1,4 @@
+//in gcloud CLI
 echo $GOOGLE_API_KEY | \
   gcloud secrets create GOOGLE_API_KEY \
   --project=PROJECT_ID \
@@ -8,6 +9,7 @@ gcloud secrets add-iam-policy-binding GOOGLE_API_KEY \
   --role="roles secretmanager.secretAccessor" \
   --project="PROJECT_ID"
 
+//in ADK terminal
 export GOOGLE_CLOUD_PROJECT="PROJECT_ID"
 export GOOGLE_CLOUD_LOCATION="us-central1"
 export AGENT_PATH="./weather_time"
