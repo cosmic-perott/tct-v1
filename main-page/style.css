@@ -1,0 +1,163 @@
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    
+    body {
+      font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
+      background-color: #f4f7f5; /* 은은한 연초록빛 도는 그레이 배경 */
+      color: #2c3e35;
+      padding: 3rem 2rem;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1100px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .brand-logo {
+      font-size: 2.5rem;
+      margin-bottom: 0.5rem;
+    }
+
+    h1 {
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #1b4332; 
+      letter-spacing: -0.5px;
+    }
+
+    p.subtitle {
+      font-size: 1rem;
+      color: #40916c;
+      margin-top: 0.5rem;
+    }
+
+    .calendar-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 2rem;
+      align-items: start;
+    }
+
+    .calendar-day-card {
+      background-color: #ffffff;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(27, 67, 50, 0.04);
+      border: 1px solid #e1e8e4;
+      overflow: hidden;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .calendar-day-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 8px 30px rgba(27, 67, 50, 0.08);
+    }
+
+    .day-header {
+      background-color: #2d6a4f; /* 메인 그린 */
+      padding: 1.25rem;
+      color: #ffffff;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .day-label {
+      font-size: 1.1rem;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+    }
+
+    .date-sub {
+      font-size: 0.85rem;
+      background-color: rgba(255, 255, 255, 0.2);
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-weight: 500;
+    }
+
+    .day-body {
+      padding: 1.5rem;
+    }
+
+    .timeline-item {
+      position: relative;
+      padding-left: 1.8rem;
+      border-left: 2px solid #e1e8e4;
+      padding-bottom: 1.5rem;
+    }
+
+    .timeline-item:last-child {
+      padding-bottom: 0;
+      border-left: 2px solid transparent;
+    }
+
+    .timeline-node {
+      position: absolute;
+      left: -6px;
+      top: 5px;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+    }
+
+    .item-meta {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      margin-bottom: 0.4rem;
+    }
+
+    .time-stamp {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: #6c7a72;
+    }
+
+    /* 미니 태그 스타일 */
+    .badge {
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 2px 6px;
+      border-radius: 4px;
+      letter-spacing: 0.3px;
+    }
+
+    .badge-attraction {
+      background-color: #e8f5e9;
+      color: #2d6a4f;
+      border: 1px solid #c8e6c9;
+    }
+
+    .badge-restaurant {
+      background-color: #e3f2fd;
+      color: #1565c0;
+      border: 1px solid #bbdefb;
+    }
+
+    .item-name {
+      font-size: 1rem;
+      font-weight: 600;
+      color: #1b4332;
+      margin-bottom: 0.25rem;
+    }
+
+    .item-desc {
+      font-size: 0.85rem;
+      color: #5c6b62;
+      line-height: 1.4;
+    }
+  
