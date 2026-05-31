@@ -6,7 +6,7 @@ from google.adk.tools.mcp_tool import McpToolset
 from google.adk.tools.mcp_tool.mcp_session_manager import StdioConnectionParams
 from mcp import StdioServerParameters
 
-CONNECTION_STRING = "mongodb+srv://kkjunyy088_db_user:ivSmBUXZXNZBgvMh@mongodb-trip.towjiib.mongodb.net/?appName=mongodb-trip"
+CONNECTION_STRING = [MONGODB_URI]
 
 #HOTEL
 hotel_expert_agent_google_search_agent = LlmAgent(
